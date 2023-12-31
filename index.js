@@ -6,7 +6,7 @@ app.use(cors());
 app.use(express.json());
 const port = process.env.PORT || 5000;
 app.get("/", (req, res) => {
-  res.send("welcome");
+  res.send("welcome to Techouse");
 });
 
 
@@ -27,7 +27,17 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
+    const Products=client.db('TecHouse').collection('Products')
+    const Users=client.db('TecHouse').collection('Users')
     await client.db("admin").command({ ping: 1 });
+    // !----------------- user related route --------------------
+    // ! post user into data base 
+    app.post('/postUser',async(req,res)=>{
+      const data=req.body
+     const result=await Users.insertOne(data)
+      res.send(result)
+    })
+    
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
