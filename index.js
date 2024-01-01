@@ -37,7 +37,12 @@ async function run() {
       const result = await Users.insertOne(data);
       res.send(result);
     });
-
+    // ! -------------------- Products related route --------------
+    // ! get all Products 
+    app.get('/getAllProducts',async(req,res)=>{
+      const result=await Products.find().toArray()
+      res.send(result)
+    })
     // ! -------------- Post jwt ----------------
     app.post("/jwt", (req, res) => {
       const user = req.body;
