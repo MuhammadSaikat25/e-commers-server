@@ -63,6 +63,16 @@ async function run() {
       }
       next();
     };
+    const verifySeller=async(req,res,next)=>{
+      const email =req.decode.email
+      const query={email}
+      const findSeller=await Users.findOne(query)
+      const seller=findSeller.role==='seller'
+      if(!seller){
+        return res.status(401).send("forbidden access");
+      }
+      next()
+    }
     //* ----------------- user related route --------------------
     // ! post user into data base
     app.post("/postUser", async (req, res) => {
@@ -131,6 +141,7 @@ async function run() {
       const result = await AddToCart.insertOne(data);
       res.send(result);
     });
+    
     // * ---------------------- Seller Related Route ---------------------
     // ! put Seller request
     app.put("/applySeller/:email", async (req, res) => {
@@ -168,6 +179,12 @@ async function run() {
         res.send(result);
       }
     );
+    // ! add product by seller
+    app.post('/addedProductBySeller',VerifyJwt,verifySeller,async(req,res)=>{
+      const data=req.body 
+      const result=await Products.insertOne(data)
+      res.send(result)
+    })
     // * -------------- Post jwt ----------------
     // ! post jwt
     app.post("/jwt", (req, res) => {
