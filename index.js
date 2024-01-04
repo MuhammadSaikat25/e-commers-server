@@ -176,6 +176,12 @@ async function run() {
       const result = await AddToCart.updateOne(query, updatedDoc);
       res.send(result);
     });
+    app.delete("/deleteCart/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await AddToCart.deleteOne(query);
+      res.send(result);
+    });
     // * ---------------------- Seller Related Route ---------------------
     // ! put Seller request
     app.put("/applySeller/:email", async (req, res) => {
