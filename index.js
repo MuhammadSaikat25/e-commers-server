@@ -63,16 +63,16 @@ async function run() {
       }
       next();
     };
-    const verifySeller=async(req,res,next)=>{
-      const email =req.decode.email
-      const query={email}
-      const findSeller=await Users.findOne(query)
-      const seller=findSeller.role==='seller'
-      if(!seller){
+    const verifySeller = async (req, res, next) => {
+      const email = req.decode.email;
+      const query = { email };
+      const findSeller = await Users.findOne(query);
+      const seller = findSeller.role === "seller";
+      if (!seller) {
         return res.status(401).send("forbidden access");
       }
-      next()
-    }
+      next();
+    };
     //* ----------------- user related route --------------------
     // ! post user into data base
     app.post("/postUser", async (req, res) => {
@@ -138,31 +138,44 @@ async function run() {
     // ! add cart data into database
     app.put("/addToCard/:id", VerifyJwt, async (req, res) => {
       const data = req.body;
-      const {proId,user}=req.body
-      const query ={proId,user}
-      const findData=await AddToCart.findOne(query)
-      console.log(findData)
-      if(findData){
-        const updateDoc={
-          $set:{
+      const { proId, user } = req.body;
+      const query = { proId, user };
+      const findData = await AddToCart.findOne(query);
+      console.log(findData);
+      if (findData) {
+        const updateDoc = {
+          $set: {
             ...findData,
-            quantity:findData.quantity+data.quantity
-          }
-        }
-      const updateRes=await AddToCart.updateOne(query,updateDoc)
-      res.send(updateDoc)
-      return
+            quantity: findData.quantity + data.quantity,
+          },
+        };
+        const updateRes = await AddToCart.updateOne(query, updateDoc);
+        res.send(updateDoc);
+        return;
       }
       const result = await AddToCart.insertOne(data);
       res.send(result);
     });
     // ! get user cart data
-    app.get('/getAllCardData/:email',VerifyJwt,async(req,res)=>{
-      const email=req.params.email 
-      const query={user:email}
-      const result=await AddToCart.find(query).toArray()
-      res.send(result)
-    })
+    app.get("/getAllCardData/:email", VerifyJwt, async (req, res) => {
+      const email = req.params.email;
+      const query = { user: email };
+      const result = await AddToCart.find(query).toArray();
+      res.send(result);
+    });
+    // ! update cart data
+    app.patch("/updatedCart/:id", async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          ...data,
+        },
+      };
+      const result = await AddToCart.updateOne(query, updatedDoc);
+      res.send(result);
+    });
     // * ---------------------- Seller Related Route ---------------------
     // ! put Seller request
     app.put("/applySeller/:email", async (req, res) => {
@@ -201,11 +214,16 @@ async function run() {
       }
     );
     // ! add product by seller
-    app.post('/addedProductBySeller',VerifyJwt,verifySeller,async(req,res)=>{
-      const data=req.body 
-      const result=await Products.insertOne(data)
-      res.send(result)
-    })
+    app.post(
+      "/addedProductBySeller",
+      VerifyJwt,
+      verifySeller,
+      async (req, res) => {
+        const data = req.body;
+        const result = await Products.insertOne(data);
+        res.send(result);
+      }
+    );
     // * -------------- Post jwt ----------------
     // ! post jwt
     app.post("/jwt", (req, res) => {
