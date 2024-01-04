@@ -136,12 +136,33 @@ async function run() {
 
     // * -------------------- Add To Card related route ------------------------
     // ! add cart data into database
-    app.post("/addToCard/:id", VerifyJwt, async (req, res) => {
+    app.put("/addToCard/:id", VerifyJwt, async (req, res) => {
       const data = req.body;
+      const {proId,user}=req.body
+      const query ={proId,user}
+      const findData=await AddToCart.findOne(query)
+      console.log(findData)
+      if(findData){
+        const updateDoc={
+          $set:{
+            ...findData,
+            quantity:findData.quantity+data.quantity
+          }
+        }
+      const updateRes=await AddToCart.updateOne(query,updateDoc)
+      res.send(updateDoc)
+      return
+      }
       const result = await AddToCart.insertOne(data);
       res.send(result);
     });
-    
+    // ! get user cart data
+    app.get('/getAllCardData/:email',VerifyJwt,async(req,res)=>{
+      const email=req.params.email 
+      const query={user:email}
+      const result=await AddToCart.find(query).toArray()
+      res.send(result)
+    })
     // * ---------------------- Seller Related Route ---------------------
     // ! put Seller request
     app.put("/applySeller/:email", async (req, res) => {
