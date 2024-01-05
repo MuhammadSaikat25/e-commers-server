@@ -218,6 +218,13 @@ async function run() {
       const result=await Payment.insertOne(data)
       res.send(result)
     })
+    // ! get user order product 
+    app.get(`/myOrder/:email`,VerifyJwt,async(req,res)=>{
+      const email=req.params.email 
+      const query={user:email}
+      const result=await Payment.find(query).toArray()
+      res.send(result)
+    })
     // * ---------------------- Seller Related Route ---------------------
     // ! put Seller request
     app.put("/applySeller/:email", async (req, res) => {
