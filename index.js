@@ -51,6 +51,7 @@ async function run() {
     const Users = client.db("TecHouse").collection("Users");
     const AddToCart = client.db("TecHouse").collection("AddToCart");
     const SellerRequest = client.db("TecHouse").collection("SellerRequest");
+    const Payment = client.db("TecHouse").collection("Payment");
     await client.db("admin").command({ ping: 1 });
     //! ---------------------------Verify admin
     const VerifyAdmin = async (req, res, next) => {
@@ -133,7 +134,21 @@ async function run() {
       const result = await Products.findOne(query);
       res.send(result);
     });
-
+    // ! increase sell product sell number after payment
+    app.patch(`/incSellNumber/:id`,VerifyJwt,async(req,res)=>{
+      const id=req.params.id 
+      const   {quantity}=req.body
+      const query = {_id:new ObjectId(id)}
+      const findData=await Products.findOne(query)
+      const updatedDoc={
+        $set:{
+          selling:findData.selling+quantity,
+          quantity:findData.quantity-quantity
+        }
+      }
+      const result=await Products.updateOne(query,updatedDoc)
+      res.send(result)
+    })
     // * -------------------- Add To Card related route ------------------------
     // ! add cart data into database
     app.put("/addToCard/:id", VerifyJwt, async (req, res) => {
@@ -170,18 +185,39 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
-          ...data,
+          quantity:data.quantity+1
         },
       };
       const result = await AddToCart.updateOne(query, updatedDoc);
       res.send(result);
     });
+    app.patch("/updatedDecCart/:id", async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          quantity:data.quantity-1
+        },
+      };
+     
+      const result = await AddToCart.updateOne(query, updatedDoc);
+      res.send(result);
+    });
+    // ! delete cart item 
     app.delete("/deleteCart/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await AddToCart.deleteOne(query);
       res.send(result);
     });
+    // * ----------------------------- payment related route---------------------
+    //  ! post payment
+    app.post('/payment',VerifyJwt,async(req,res)=>{
+      const data=req.body 
+      const result=await Payment.insertOne(data)
+      res.send(result)
+    })
     // * ---------------------- Seller Related Route ---------------------
     // ! put Seller request
     app.put("/applySeller/:email", async (req, res) => {
