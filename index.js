@@ -280,6 +280,33 @@ async function run() {
       const result=await Products.find(query).toArray()
       res.send(result)
     })
+    // ! get a single product for update
+    app.get('/updateProducts/:id',VerifyJwt,verifySeller,async(req,res)=>{
+      const id=req.params.id 
+      const query={_id:new ObjectId(id)}
+      const result=await Products.findOne(query)
+      res.send(result)
+    })
+    // ! update product by seller
+    app.patch('/updateProducts/:id',VerifyJwt,verifySeller,async(req,res)=>{
+      const id=req.params.id 
+      const query={_id:new ObjectId(id)}
+      const data=req.body
+      const updateDoc={
+        $set:{
+          ...data
+        }
+      }
+      const result=await Products.updateOne(query,updateDoc)
+      res.send(result)
+    })
+    // ! delete a single product
+    app.delete('/deleteProduct/:id',VerifyJwt,verifySeller,async(req,res)=>{
+      const id=req.params.id 
+      const query={_id:new ObjectId(id)}
+      const result=await Products.deleteOne(query)
+      res.send(result)
+    })
     // * -------------- Post jwt ----------------
     // ! post jwt
     app.post("/jwt", (req, res) => {
