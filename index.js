@@ -273,6 +273,13 @@ async function run() {
         res.send(result);
       }
     );
+    // ! get seller's own products 
+    app.get('/sellerProducts/:email',VerifyJwt,verifySeller,async(req,res)=>{
+      const email=req.params.email
+      const query={sellerEmail:email}
+      const result=await Products.find(query).toArray()
+      res.send(result)
+    })
     // * -------------- Post jwt ----------------
     // ! post jwt
     app.post("/jwt", (req, res) => {
