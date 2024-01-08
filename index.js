@@ -74,6 +74,7 @@ async function run() {
       }
       next();
     };
+    
     //* ----------------- user related route --------------------
     // ! post user into data base
     app.post("/postUser", async (req, res) => {
@@ -81,6 +82,7 @@ async function run() {
       const result = await Users.insertOne(data);
       res.send(result);
     });
+   
     // ! get a single user
     app.get("/getUser/:email", async (req, res) => {
       const email = req.params.email;
@@ -122,9 +124,18 @@ async function run() {
       }
     );
     // * -------------------- Products related route --------------
+    // ! get products number 
+    app.get('/getProductNumber',async(req,res)=>{
+      const  result=await Products.find().toArray()
+      const product=result.length 
+      res.send({product})
+    })
     // ! get all Products
     app.get("/getAllProducts", async (req, res) => {
-      const result = await Products.find().toArray();
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 5;
+      const skip = (page - 1) * limit;
+      const result = await Products.find().skip(skip).limit(limit).toArray()
       res.send(result);
     });
     // ! get single product
@@ -149,7 +160,14 @@ async function run() {
       const result=await Products.updateOne(query,updatedDoc)
       res.send(result)
     })
-    // * -------------------- Add To Card related route ------------------------
+    // ! get category base product
+    app.get('/getProductByCategory/:category',async(req,res)=>{
+      const category=req.params.category
+      const query={category}
+      const result=await Products.find(query).toArray()
+      res.send(result)
+    })
+    // * -------------------- Add To Cart related route ------------------------
     // ! add cart data into database
     app.put("/addToCard/:id", VerifyJwt, async (req, res) => {
       const data = req.body;
