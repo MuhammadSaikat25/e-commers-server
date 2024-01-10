@@ -147,7 +147,7 @@ async function run() {
       res.send(result);
     });
     // ! get single product
-    app.get("/singleProduct/:id", VerifyJwt, async (req, res) => {
+    app.get("/singleProduct/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await Products.findOne(query);
